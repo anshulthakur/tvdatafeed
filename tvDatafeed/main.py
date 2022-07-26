@@ -268,7 +268,7 @@ class TvDatafeed:
                     "opening browser. Press enter once lgged in return back and press 'enter'. \n\nDO NOT CLOSE THE BROWSER"
                 )
                 time.sleep(5)
-            service = Service(verbose = False, executable_path=self.chromedriver_path)
+            service = Service(executable_path=self.chromedriver_path)
 
             driver = webdriver.Chrome(
                 service = service, desired_capabilities=caps, options=options
