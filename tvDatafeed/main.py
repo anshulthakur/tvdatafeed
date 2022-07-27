@@ -21,6 +21,15 @@ import sys
 
 logger = logging.getLogger(__name__)
 
+def in_container():
+    from platform import uname
+    if 'microsoft' in uname().release.lower():
+        return True
+    with open('/proc/1/cgroup', 'rt') as proc_one:
+        prog = proc_one.read()
+        if prog in ["docker", "lxc", "kubepod", "kubepods"]:
+            return True 
+    return False
 
 class Interval(enum.Enum):
     in_1_minute = "1"
@@ -192,7 +201,7 @@ class TvDatafeed:
                 logger.debug("click login")
                 submit_button = driver.find_element(By.CLASS_NAME, "tv-button__loader")
                 submit_button.click()
-                time.sleep(2)
+                time.sleep(5)
             except Exception as e:
                 logger.error(f"{e}, {e.args}")
                 logger.error(
@@ -245,8 +254,9 @@ class TvDatafeed:
 
         # options.add_argument("--start-maximized")
         options.add_argument("--disable-gpu")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
+        if in_container():
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
 
         # special workaround for linux
         if sys.platform == "linux":
