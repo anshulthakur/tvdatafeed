@@ -11,6 +11,7 @@ import string
 import time
 import pandas as pd
 from selenium import webdriver
+import selenium
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -180,7 +181,7 @@ class TvDatafeed:
                     "tv-signin-dialog__toggle-email"
                 )
                 embutton.click()
-                time.sleep(5)
+                time.sleep(1)
 
                 logger.debug("entering credentials")
                 username_input = driver.find_element(By.NAME, "username")
@@ -191,7 +192,7 @@ class TvDatafeed:
                 logger.debug("click login")
                 submit_button = driver.find_element(By.CLASS_NAME, "tv-button__loader")
                 submit_button.click()
-                time.sleep(5)
+                time.sleep(2)
             except Exception as e:
                 logger.error(f"{e}, {e.args}")
                 logger.error(
@@ -244,6 +245,8 @@ class TvDatafeed:
 
         # options.add_argument("--start-maximized")
         options.add_argument("--disable-gpu")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
 
         # special workaround for linux
         if sys.platform == "linux":
@@ -268,11 +271,17 @@ class TvDatafeed:
                     "opening browser. Press enter once lgged in return back and press 'enter'. \n\nDO NOT CLOSE THE BROWSER"
                 )
                 time.sleep(5)
-            service = Service(executable_path=self.chromedriver_path)
 
-            driver = webdriver.Chrome(
-                service = service, desired_capabilities=caps, options=options
-            )
+            if int(selenium.__version__.split('.')[0])>=4:
+                service = Service(executable_path=self.chromedriver_path)
+                driver = webdriver.Chrome(
+                    service = service, desired_capabilities=caps, options=options
+                )
+            else:
+                driver = webdriver.Chrome(
+                    desired_capabilities=caps, options=options, executable_path=self.chromedriver_path
+                )
+            
 
             logger.debug("opening https://in.tradingview.com ")
             driver.set_window_size(1920, 1080)
